@@ -28,13 +28,14 @@ task :build do
   # Add additional javascript here if you'd like
   js.write File.open('src/js/project.js').read
 
-  # Rewind the pointer to the beginning of the tempfile
-  js.rewind
   # Write the uglified version of the javascript
+  js.rewind
   File.open('dist/js/project.min.js', 'w+') { |f| f.write Uglifier.compile( js.read ) }
   js.close
+
   # Copy the tempfile as the non-uglified version of the javascript
   FileUtils.copy js, "dist/js/project.js"
+
   # Cleanup the temp file
   js.unlink
 end
