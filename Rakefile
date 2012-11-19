@@ -17,8 +17,8 @@ task :build do
   File.open('dist/css/project.css', 'w+') { |f| f.write tree.to_css }
   File.open('dist/css/project.min.css', 'w+') { |f| f.write tree.to_css(:yuicompress => true) }
 
-  # Define the bootstrap JS modules to include
-  bootstrap_js = %w( affix alert button carousel collapse dropdown modal popover scrollspy tab tooltip transition typeahead )
+  # Define the bootstrap JS modules to include ( They have to go in this order )
+  bootstrap_js = %w( transition alert button carousel collapse dropdown modal tooltip popover scrollspy tab typeahead affix )
 
   # Concat all of our javascript into a tempfile
   js = Tempfile.new('js-build')
@@ -40,7 +40,6 @@ task :build do
   js.unlink
 end
 
-
 desc "Asset watcher"
 task :watch do
   require 'listen'
@@ -50,6 +49,10 @@ task :watch do
   puts "I'm watching you...\n"
   Listen.to(File.expand_path('../src', __FILE__), :filter => /\.(less|js)$/) do
     puts "Building #{Time.now.strftime('%r')}\n"
-    Rake::Task["build"].execute
+    begin
+      Rake::Task["build"].execute
+    rescue Exception => e
+      puts e
+    end
   end
 end
