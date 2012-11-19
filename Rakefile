@@ -1,6 +1,9 @@
 require 'rubygems'
+require 'tempfile'
+require 'fileutils'
 require 'bundler/setup'
 require 'less'
+require 'uglifier'
 
 desc "Compile Assets"
 task :build do
@@ -13,6 +16,27 @@ task :build do
   # Write CSS files, compressed, and un-compressed
   File.open('dist/css/project.css', 'w+') { |f| f.write tree.to_css }
   File.open('dist/css/project.min.css', 'w+') { |f| f.write tree.to_css(:yuicompress => true) }
+
+  # Define the bootstrap JS modules to include
+  bootstrap_js = %w( affix alert button carousel collapse dropdown modal popover scrollspy tab tooltip transition typeahead )
+
+  # Concat all of our javascript into a tempfile
+  js = Tempfile.new('js-build')
+  bootstrap_js.each { |j| js.write File.open("src/lib/bootstrap/js/bootstrap-#{j}.js").read }
+
+  ## NOTE: ##
+  # Add additional javascript here if you'd like
+  js.write File.open('src/js/project.js').read
+
+  # Rewind the pointer to the beginning of the tempfile
+  js.rewind
+  # Write the uglified version of the javascript
+  File.open('dist/js/project.min.js', 'w+') { |f| f.write Uglifier.compile( js.read ) }
+  js.close
+  # Copy the tempfile as the non-uglified version of the javascript
+  FileUtils.copy js, "dist/js/project.js"
+  # Cleanup the temp file
+  js.unlink
 end
 
 
@@ -23,7 +47,7 @@ task :watch do
   require 'rb-fsevent' if RUBY_PLATFORM.include?('darwin')
 
   puts "I'm watching you...\n"
-  Listen.to(File.expand_path('../src', __FILE__), :filter => /\.less$/) do
+  Listen.to(File.expand_path('../src', __FILE__), :filter => /\.(less|js)$/) do
     puts "Building #{Time.now.strftime('%r')}\n"
     Rake::Task["build"].execute
   end
