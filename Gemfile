@@ -7,8 +7,9 @@ gem 'less'
 gem "uglifier", "~> 1.3.0"
 gem 'listen'
 
-# If we're on a mac use rb-fsevent for listening
-# TODO: Add linux watcher lib conditional
+# Check for platform specific listener helpers
 if RUBY_PLATFORM.include?('darwin')
   gem 'rb-fsevent'
+elsif RUBY_PLATFORM.include?('linux')
+  gem 'rb-inotify'
 end

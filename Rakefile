@@ -44,8 +44,13 @@ end
 desc "Asset watcher"
 task :watch do
   require 'listen'
-  # TODO: Add linux watcher lib conditional
-  require 'rb-fsevent' if RUBY_PLATFORM.include?('darwin')
+
+  # Require platform specific file system watcher gems
+  if RUBY_PLATFORM.include?('darwin')
+    require 'rb-fsevent'
+  elsif RUBY_PLATFORM.include?('linux')
+    require 'rb-inotify'
+  end
 
   puts "I'm watching you...\n"
   Listen.to(File.expand_path('../src', __FILE__), :filter => /\.(less|js)$/) do
