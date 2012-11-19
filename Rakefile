@@ -10,7 +10,8 @@ task :build do
   # Instantiate the parser, putting our src/less path before src/lib/bootstrap/less in the include path
   parser = Less::Parser.new :paths => [ 'src/less', 'src/lib/bootstrap/less' ], :filename => 'project.less'
 
-  # Parse project.less
+  # In this example project.less is the only less file that gets compiled, so it should
+  # include anything that needs to be included.
   tree = parser.parse( File.open('src/less/project.less').read )
 
   # Write CSS files, compressed, and un-compressed
